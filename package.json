@@ -38,7 +38,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/snyk-labs/parallelizer-function.git"
+    "url": "https://github.com/josealejandro2928/parallelizer-function.git"
   },
   "keywords": [
     "npm",
@@ -56,9 +56,9 @@
   "author": "Jose Alejandro Concepcion Alvarez",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/snyk-labs/parallelizer-function/issues"
+    "url": "https://github.com/josealejandro2928/parallelizer-function.git/issues"
   },
-  "homepage": "https://github.com/snyk-labs/parallelizer-function#readme",
+  "homepage": "https://github.com/josealejandro2928/parallelizer-function.git#readme",
   "devDependencies": {
     "@jest/globals": "^29.3.1",
     "@types/jest": "^29.2.6",
