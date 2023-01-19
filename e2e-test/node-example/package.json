@@ -1,0 +1,14 @@
+{
+  "name": "node-example",
+  "version": "1.0.0",
+  "description": "An example node project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "parallelizer-function": "file:../../parallelizer-function-0.0.1.dev.tgz"
+  }
+}

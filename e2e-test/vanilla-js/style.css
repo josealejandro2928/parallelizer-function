@@ -1,0 +1,9 @@
+.main{
+    margin: 0 auto;
+    max-width: 500px;
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+}
+
+#non-bloking-res,#bloking-res{
+    font-style: italic;
+}
