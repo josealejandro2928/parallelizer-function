@@ -5,6 +5,8 @@ import { describe, expect, test } from '@jest/globals';
 import { workerPromise } from '../src/index';
 import npmPackage from '../src/index';
 
+const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
 function sumUpToN(n: number) {
   let sum = 0;
   for (let i = 0; i <= n; i++) {
