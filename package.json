@@ -1,6 +1,6 @@
 {
   "name": "parallelizer-function",
-  "version": "0.0.1.dev",
+  "version": "0.0.1",
   "description": "A npm package for running javaScript function in a different Thread. This uses the Worker api",
   "exports": {
     ".": {
