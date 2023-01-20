@@ -35,12 +35,35 @@ nonBlokingBtnEl.addEventListener("click", async () => {
 })
 
 let clicks = 0;
+
+async function getAllProduct() {
+    let limit = 25;
+    let skip = 0;
+    let fetchData = await fetch("https://dummyjson.com/products?limit=0");
+    let total = (await fetchData.json()).total;
+    let arrayPromises = [];
+    while (skip < total) {
+        arrayPromises.push(fetch(`https://dummyjson.com/products?limit=${limit}&skip=${skip}`));
+        skip = Math.min(skip + limit, total);
+    }
+    arrayPromises = (await Promise.all(arrayPromises)).map(el => el.json());
+    let allData = (await Promise.all(arrayPromises)).reduce((acc, curr) => {
+        const { products } = curr;
+        acc = acc.concat(products);
+        return acc
+    }, []);
+    return allData;
+}
+
 clickBtnEl.addEventListener("click", async () => {
     try {
         clicks++;
         resClickEl.textContent = clicks;
+        let res = await workerPromise(getAllProduct, [])
+        console.log(res.map(el => el.title).join("\n"));
+
     } catch (e) {
-        console.error(e.message);
+        console.error("Error in method click:", e.message);
     }
 })
 

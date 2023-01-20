@@ -1,12 +1,17 @@
 function main() {
   if (!(typeof window === 'undefined')) {
-    const workerPromise = async (fn: (...params: [any]) => any = () => {}, args: any[] = []) => {
+    console.log('workerPromise: Using implementation for browser');
+    const workerPromise = async (
+      fn: (...params: [any]) => any = () => {},
+      args: any[] = []
+    ): Promise<any> => {
       let code = `
-        self.onmessage = (msg) => {
-          const {data} = msg
-          Promise.resolve((${fn.toString()})(...data))
-          .then((returnedData)=>self.postMessage(returnedData))
-          .catch((e)=> {throw e});    
+        self.onmessage = ({ data }) => {
+          Promise.resolve((${fn.toString()})(...data)).then((value) => {
+            self.postMessage({ error: null, data: value });
+          }).catch((error) => {
+            self.postMessage({ error: error, data: null });
+          })   
         }`;
       let urlToCode: any = URL.createObjectURL(new Blob([code]));
       const worker = new window.Worker(urlToCode);
@@ -14,28 +19,33 @@ function main() {
       return new Promise((resolve, reject) => {
         worker.postMessage(args);
         worker.onmessage = (ev: MessageEvent<any>) => {
-          resolve(ev.data);
+          const { error, data } = ev.data;
+          if (error) {
+            reject(error);
+          } else {
+            resolve(data);
+          }
           worker.terminate();
         };
         worker.onmessageerror = (ev: MessageEvent<any>) => {
-          resolve(ev.data);
+          reject(ev.data);
           worker.terminate();
         };
         worker.onerror = (ev: ErrorEvent) => {
-          console.log('**********************ERROR*******************', ev);
-          reject(ev.error);
+          reject(ev);
           worker.terminate();
         };
-        worker.addEventListener('error', (ev: ErrorEvent) => {
-          console.log('**********************ERROR*******************', ev);
-        });
       });
     };
     return workerPromise;
   } else {
+    console.log('workerPromise: Using implementation for nodejs');
     const { Worker } = require('worker_threads');
 
-    const workerPromise = async (fn: (...params: [any]) => any = () => {}, args: any[] = []) => {
+    const workerPromise = async (
+      fn: (...params: [any]) => any = () => {},
+      args: any[] = []
+    ): Promise<any> => {
       const worker = new Worker(
         `
           const { workerData, parentPort } = require('worker_threads')

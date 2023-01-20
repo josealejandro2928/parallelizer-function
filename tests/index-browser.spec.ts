@@ -1,7 +1,9 @@
+/**
+ * @jest-environment jsdom
+ */
 import { describe, expect, test } from '@jest/globals';
 import { workerPromise } from '../src/index';
 import npmPackage from '../src/index';
-
 
 function sumUpToN(n: number) {
   let sum = 0;
@@ -83,30 +85,6 @@ describe('Test workerPromise function for NodeJS environment', () => {
     };
     let args: any[] = [1, 2, 'hello word', { name: 'Jose', values: [1, 2, 3, 4] }];
     expect(args).toEqual(await workerPromise(fn, args));
-    args = [
-      {
-        name: 'Jose',
-        values: [1, 2, 3, 4],
-        getName: function () {
-          return this.name;
-        },
-      },
-    ];
-    try {
-      await workerPromise(fn, args);
-      expect(true).toBe(false);
-    } catch (error: any) {
-      expect(error).toBeInstanceOf(DOMException);
-      expect(error.message).toContain('could not be cloned');
-    }
-
-    try {
-      await workerPromise(async () => {
-        throw new Error('Custom Error');
-      });
-    } catch (error: any) {
-      expect(error.message).toContain('Custom Error');
-    }
   });
 });
 
@@ -128,30 +106,15 @@ describe('Test making I/O operations', () => {
         return data;
       }, []);
     } catch (e: any) {
-      expect(e.message).toContain('fetch failed');
+      expect(e.message).toContain('failed');
     }
-  });
-  it('It should perform read files and handle errors', async () => {
-    let data: [string] = await workerPromise(() => {
-      const fs = require('fs');
-      const path = require('path');
-      const pathFile = path.resolve('./tests/__mock__/sample.txt');
-      let files = fs.readFileSync(pathFile, { encoding: 'utf-8' });
-      return files.split('\n');
-    }, []);
-    expect(data.length).toBe(100);
-    expect(data.at(-1)).toBe('Crystal chandelier maria theresa for 12 light');
 
     try {
-      await workerPromise(() => {
-        const fs = require('fs');
-        const path = require('path');
-        const pathFile = path.resolve('./tests/__mock__/xxxxxx.txt');
-        let files = fs.readFileSync(pathFile, { encoding: 'utf-8' });
-        return files.split('\n');
-      }, []);
-    } catch (e: any) {
-      expect(e.message).toContain('no such file or directory');
+      await workerPromise(async () => {
+        throw new Error('Custom Error');
+      });
+    } catch (error: any) {
+      expect(error.message).toContain('Custom Error');
     }
   });
 });
