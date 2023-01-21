@@ -1,5 +1,5 @@
 .App {
-  // max-width: 1280px;
+  max-width: 1280px;
   margin: 0px auto;
 
   .logo {
@@ -75,7 +75,17 @@
       max-width: 50%;
       padding: 16px;
     }
+    @media screen and (max-width:800px) {
+      .side-l{
+        max-width: 100%;
+      }
+      .side-r{
+        max-width: 100%;
+      }
+      
+    }
   }
+  
 }
 
 .table {

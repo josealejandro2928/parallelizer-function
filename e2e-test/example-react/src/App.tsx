@@ -1,27 +1,29 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.scss'
-import FibonacciComputator from './components/Fibonacci'
-import GeneratePermutation from './components/GeneratePermutation'
-import GetProducts, { IProduct } from './components/GetProducts'
+import { useEffect, useState } from 'react';
+import reactLogo from './assets/react.svg';
+import './App.scss';
+import FibonacciComputator from './components/Fibonacci';
+import SimulateLongTask from './components/SimulateLongTask';
+import GetProducts, { IProduct } from './components/GetProducts';
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [permutations, setPermutations] = useState<Array<Array<number>>>([]);
-  const [dataProduct, setDataProducts] = useState<{ products: Array<IProduct>, meta: any }>();
+  const [count, setCount] = useState(0);
+  const [delayS, setDelayS] = useState<number>(0);
+  const [simulateLongTask, setSimulateLongTask] = useState<number>(0);
+  const [dataProduct, setDataProducts] =
+    useState<{ products: Array<IProduct>; meta: any }>();
 
   useEffect(() => {
     console.log(dataProduct);
-  }, [dataProduct])
+  }, [dataProduct]);
 
   return (
     <div className="App">
       <div className="main-container">
-        <div className='side-l'>
+        <div className="side-l">
           <FibonacciComputator></FibonacciComputator>
         </div>
-        <div className='side-r'>
-          <div className='card'>
+        <div className="side-r">
+          <div className="card">
             <div>
               <a href="https://vitejs.dev" target="_blank">
                 <img src="/vite.svg" className="logo" alt="Vite logo" />
@@ -31,7 +33,7 @@ function App() {
               </a>
             </div>
             <h1>Vite + React</h1>
-            <div >
+            <div>
               <button onClick={() => setCount((count) => count + 1)}>
                 count is {count}
               </button>
@@ -41,47 +43,43 @@ function App() {
       </div>
       <hr />
       <div className="main-container">
-        <div className='side-l'>
-          <GeneratePermutation setPermutations={setPermutations}></GeneratePermutation>
+        <div className="side-l">
+          <SimulateLongTask
+            setDelayS={setDelayS}
+            setSimulateLongTask={setSimulateLongTask}
+          ></SimulateLongTask>
         </div>
-        <div className='side-r' style={{ "alignItems": "flex-start", "justifyContent": "flex-start" }}>
-          {permutations && (
-            <>
-              <div>
-                <h3>The total of permutation are: {permutations.length}</h3>
-              </div>
-              <div>
-                {permutations.slice(0, 24).map((value, index) => {
-                  return (
-                    <>
-                      <span>[{value.toString()}]</span>
-                      {index < Math.min(24 - 1, permutations.length - 1) && (<span>, </span>)}
-                    </>
-                  )
-                })}
-                {permutations.length > 24 && <>
-                  ...
-                </>}
-
-              </div>
-            </>
-          )}
+        <div
+          className="side-r"
+          style={{ alignItems: 'flex-start', justifyContent: 'flex-start' }}
+        >
+          <div>
+            <h3>The delay in seconds of the long task is: {delayS} s</h3>
+          </div>
+          <div>
+            <p style={{ margin: 0 }}>
+              The number of iteration was: {simulateLongTask}
+            </p>
+          </div>
         </div>
       </div>
       <hr />
       <div className="main-container">
-        <div className='side-l'>
+        <div className="side-l">
           <GetProducts setData={setDataProducts} />
         </div>
-        <div className='side-r' style={{ "alignItems": "flex-start", "justifyContent": "flex-start" }}>
+        <div
+          className="side-r"
+          style={{ alignItems: 'flex-start', justifyContent: 'flex-start' }}
+        >
           {dataProduct && (
             <>
               <h3>Sample of computation data</h3>
-              <table className='table'>
+              <table className="table">
                 <tr>
-                  <th>{"rating>4"}</th>
-                  <th>{"rating<3"}</th>
-                  <th>{"# out stock"}</th>
+                  <th>{'rating>4'}</th>
+                  <th>{'rating<3'}</th>
+                  <th>{'# out stock'}</th>
                 </tr>
                 <tbody>
                   <tr>
@@ -93,34 +91,38 @@ function App() {
               </table>
               <hr />
               <h3>Sample of products</h3>
-              <div className='product-container'>
-
+              <div className="product-container">
                 {dataProduct.products.slice(0, 6).map((product) => (
                   <div className="product-card">
                     <div className="product-image">
-                      <img src={product.images[0]} alt={product.title} srcSet={product.tumbnail} />
+                      <img
+                        src={product.images[0]}
+                        alt={product.title}
+                        srcSet={product.tumbnail}
+                      />
                     </div>
                     <div className="product-body">
-                      <p className='name'>{product.title}</p>
-                      <p className='desc'>{product.description}</p>
-                      <p className='price'>{product.price}$</p>
+                      <p className="name">{product.title}</p>
+                      <p className="desc">{product.description}</p>
+                      <p className="price">{product.price}$</p>
                     </div>
                   </div>
                 ))}
               </div>
               <h3>Categories frecuencies</h3>
-              <table className='table'>
+              <table className="table">
                 <tr>
-                  <th>{"category"}</th>
-                  <th>{"count"}</th>
+                  <th>{'category'}</th>
+                  <th>{'count'}</th>
                 </tr>
                 <tbody>
-                  {Object.keys(dataProduct?.meta?.categoryInfo).map(key => {
+                  {Object.keys(dataProduct?.meta?.categoryInfo).map((key) => {
                     return (
                       <tr>
                         <td>{key}</td>
                         <td>{dataProduct.meta.categoryInfo[key]}</td>
-                      </tr>)
+                      </tr>
+                    );
                   })}
                 </tbody>
               </table>
@@ -128,10 +130,8 @@ function App() {
           )}
         </div>
       </div>
-
-
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
