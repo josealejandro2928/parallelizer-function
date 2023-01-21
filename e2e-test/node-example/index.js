@@ -6,12 +6,15 @@ function fibonacci(n = 2) {
     if (n == 1) return 1;
     return fibonacci(n - 1) + fibonacci(n - 2);
 }
-
-function promifiedFibonacci(n) {
-    return new Promise((res) => {
-        res(fibonacci(n));
-    })
+function sumUpTo(n = 500) {
+    let sum = 0;
+    for (let i = 0; i <= n; i++) {
+        sum += i;
+    }
+    return sum;
 }
+
+
 
 async function main() {
 
@@ -19,6 +22,13 @@ async function main() {
         console.log("Fibonacci for: ", 40, "is", res);
     })
     console.log("The Fibonacci computation using  workerPromised does not block the main thread");
+
+    let data = await Promise.all([
+        workerPromise(fibonacci, [20]),
+        workerPromise(sumUpTo, [500])
+    ]);
+    console.log("data: ", data);
+
 
     try {
         let res = await workerPromise(async () => {
@@ -31,12 +41,5 @@ async function main() {
     }
 }
 
-function main2() {
-    promifiedFibonacci(40).then((res) => {
-        console.log("Fibonacci for: ", 40, "is", res);
-    })
-    console.log("The Fibonacci computation using  a Promise based of the function block the main thread");
-}
-
 main();
-main2();
+
