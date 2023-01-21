@@ -4,14 +4,24 @@ An npm package for running JavaScript functions in a different Thread. This impl
 I got the inspiration from the python implementation of thread library, where you can run a function in another thread in a very straightforward way:
 
 ```Python
-import thread
+from threading import Thread
 def function_name(*args,**kwargs):
     pass
 
-thread.start_new_thread ( function_name, args[, kwargs] )
+thread = Thread(target=function_name, args=[, kwargs])
+thread.start()
+thread.join()
 ```
-
-In order to use parallelizer-function in JavaScript you can use like this:
+## installation
+npm
+```sh
+ npm i parallelizer-function --save
+```
+yarn
+```sh
+ yarn add parallelizer-function
+```
+In order to use **parallelizer-function** package in JavaScript you can use like this:
 
 ```JavaScript
 const { workerPromise } = require("parallelizer-function");
@@ -35,7 +45,7 @@ try{
 }
 ```
 
-The primary importance of workerPromise is that it executes the passed function in a separate thread, which makes the execution of that function not block the main JavaScript thread during the execution of the event loop. It should be noted that extensive thread usage will cause a memory impact on the program process. It is a trade-off between performance and responsiveness.
+The primary importance of **workerPromise** is that it executes the passed function in a separate thread, which makes the execution of that function not block the main JavaScript thread during the execution of the event loop. It should be noted that extensive thread usage will cause a memory impact on the program process. It is a trade-off between performance and responsiveness.
 We should rely on the built-in JavaScript functionalities to execute I/O operations like querying a database, read-write files, or making an http request. These tasks will not block the main JS event loop execution; behind the scenes, the v8 engine uses the C libuv library to execute these I/O tasks.
 
 But if we have to perform some extensive computation that includes a lot of iteration, like performing a kind of data processing or data normalization, process images, math computation, physic simulation, web crawling, etc. We can use the workerPromise function to allow that.
@@ -73,7 +83,7 @@ Is important to clarify that the the script is created in memory with the use of
 
 ## Example uses case
 
-Imagine we have this sample of function that we wan to compute in a web site or to responsing a request using a server in express.
+Let's imagine we have this sample of functions we want to compute on a website or respond to a request using an express server.
 
 ```TypeScript
 import workerPromise from "parallelizer-function";
@@ -81,13 +91,14 @@ import workerPromise from "parallelizer-function";
 function isPrimeThisNumber(n){
     // This function takes an integer and returns whether it is a prime number or not. Complexity O(n^1/2)
     for(let i=2;i*i<=n;i++){
-        if(n%2 == 0) return false;
+        if(n%i == 0) return false;
     }
     return true
 }
 
 function 3Sum(arr=[]){
-    // This function return all the distinc triplet i,j,k i<j<k, where arr[i] + arr[j] + arr[k] sum up to 0. Complexity O(n^2)
+    // This function return all the distinc triplet i,j,k i<j<k, 
+    // where arr[i] + arr[j] + arr[k] sum up to 0. Complexity O(n^2)
     let visited = new Set()
     let sol = []
     arr = arr.sort()
@@ -114,12 +125,12 @@ function simulateLongTask(){
     let now = Date.now();
     let iter = 0;
     let MAX_DELAY = 10*1000; // 10 seconds 100000 milliseconds
-    while((Date.now() - now)){
+    while((Date.now() - now) < MAX_DELAY ){
         iter++;
     }
     return iter;
 }
-}
+
 ```
 
 If you have a listener to react to the click button or an endpoint API and the inputs for the functions are bigger enough. The following snippets code will block the main thread of JS; which will cause a web site becomes unresponsible or an API that will not accept more incoming requests.
@@ -148,7 +159,8 @@ someBTNEl.addEventListener("click",async ()=>{
     try{
         let res = await workerPromise(isPrimeThisNumber,[352684978]);
         console.log(res);
-    /// This will not block the main thread of JS, it will run "isPrimeThisNumber" in a separate thread using Worker class.
+    // This will not block the main thread of JS, it will run "isPrimeThisNumber" 
+    // in a separate thread using Worker class.
 
     }catch(error){
 
@@ -173,14 +185,19 @@ let functions = {
 app.post("/compute/:fn",(req,res)=>{
     let fn = req.params.fn;
     if(!fn || !(fn in functions)){
-        return res.status(401).json({msg:"Not founf the function"});
+        return res.status(401).json({msg:"Not found the function"});
     }
     try{
         let res = await workerPromise(functions[fn],req.body.args);
-        /// This will not block the main thread of JS, it will run
+        // This will not block the main thread of JS, it will run
         return res.status(200).json({error:false,msg:"OK",data:res});
     }catch(e){
         return res.status(400).json({error:true,msg:e.message});
     }
 })
 ```
+##### Stackblitz examples
+
+#### [stackblitz example in a react application](https://stackblitz.com/edit/parallelizer-function-example-react?file=src/App.tsx)
+
+#### [stackblitz example in a node application](https://stackblitz.com/edit/parallelizer-function-example-node?file=index.js)
