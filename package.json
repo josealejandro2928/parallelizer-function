@@ -1,6 +1,6 @@
 {
   "name": "parallelizer-function",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "An npm package for running JavaScript functions in a different Thread. This implementation uses the Worker API. It works for both browsers and NodeJs. Based on the run environment, it uses the Nodejs build-in library \"worker_threads\" or the default window.Worker class in case of a browser environment",
   "exports": {
     ".": {

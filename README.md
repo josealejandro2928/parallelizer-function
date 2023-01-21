@@ -52,11 +52,12 @@ try{
 ```
 
 
-##### Stackblitz examples
+#### Stackblitz examples
 
 #### [stackblitz example in a react application](https://stackblitz.com/edit/parallelizer-function-example-react?file=src/App.tsx)
 
 #### [stackblitz example in a node application](https://stackblitz.com/edit/parallelizer-function-example-node?file=index.js)
+
 
 
 The primary importance of **workerPromise** is that it executes the passed function in a separate thread, which makes the execution of that function not block the main JavaScript thread during the execution of the event loop. It should be noted that extensive thread usage will cause a memory impact on the program process. It is a trade-off between performance and responsiveness.
