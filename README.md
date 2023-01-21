@@ -12,15 +12,21 @@ thread = Thread(target=function_name, args=[, kwargs])
 thread.start()
 thread.join()
 ```
+
 ## installation
+
 npm
+
 ```sh
  npm i parallelizer-function --save
 ```
+
 yarn
+
 ```sh
  yarn add parallelizer-function
 ```
+
 In order to use **parallelizer-function** package in JavaScript you can use like this:
 
 ```JavaScript
@@ -44,6 +50,14 @@ try{
     console.error(error)
 }
 ```
+
+
+##### Stackblitz examples
+
+#### [stackblitz example in a react application](https://stackblitz.com/edit/parallelizer-function-example-react?file=src/App.tsx)
+
+#### [stackblitz example in a node application](https://stackblitz.com/edit/parallelizer-function-example-node?file=index.js)
+
 
 The primary importance of **workerPromise** is that it executes the passed function in a separate thread, which makes the execution of that function not block the main JavaScript thread during the execution of the event loop. It should be noted that extensive thread usage will cause a memory impact on the program process. It is a trade-off between performance and responsiveness.
 We should rely on the built-in JavaScript functionalities to execute I/O operations like querying a database, read-write files, or making an http request. These tasks will not block the main JS event loop execution; behind the scenes, the v8 engine uses the C libuv library to execute these I/O tasks.
@@ -97,7 +111,7 @@ function isPrimeThisNumber(n){
 }
 
 function 3Sum(arr=[]){
-    // This function return all the distinc triplet i,j,k i<j<k, 
+    // This function return all the distinc triplet i,j,k i<j<k,
     // where arr[i] + arr[j] + arr[k] sum up to 0. Complexity O(n^2)
     let visited = new Set()
     let sol = []
@@ -159,7 +173,7 @@ someBTNEl.addEventListener("click",async ()=>{
     try{
         let res = await workerPromise(isPrimeThisNumber,[352684978]);
         console.log(res);
-    // This will not block the main thread of JS, it will run "isPrimeThisNumber" 
+    // This will not block the main thread of JS, it will run "isPrimeThisNumber"
     // in a separate thread using Worker class.
 
     }catch(error){
@@ -196,6 +210,7 @@ app.post("/compute/:fn",(req,res)=>{
     }
 })
 ```
+
 ##### Stackblitz examples
 
 #### [stackblitz example in a react application](https://stackblitz.com/edit/parallelizer-function-example-react?file=src/App.tsx)
