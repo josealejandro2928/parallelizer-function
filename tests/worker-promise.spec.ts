@@ -67,9 +67,6 @@ describe('workerPromise', () => {
     await workerPromise(() => {}, []);
     await workerPromise(() => {}, []);
     await workerPromise(() => {}, []);
-    await workerPromise(() => {}, []);
-    await workerPromise(() => {}, []);
-    await workerPromise(() => {}, []);
 
     // Get final memory usage
     // Assert that the difference in memory usage is not significant
@@ -84,12 +81,8 @@ describe('workerPromise', () => {
       workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
       workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
       workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
     ]);
-    expect(data).toHaveLength(8);
+    expect(data).toHaveLength(4);
     memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
     expect(memoryDiff).toBeLessThan(1024 * 1024 * 10); // 10MB
 

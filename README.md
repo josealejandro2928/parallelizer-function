@@ -1,19 +1,8 @@
 # parallelizer-function
 
 An npm package for running JavaScript functions in a different Thread. This implementation uses the Worker API. It works for both browsers and NodeJs. Based on the run environment, it uses the Nodejs build-in library "worker_threads" or the default window.Worker class in case of a browser environment.
-I got the inspiration from the python implementation of thread library, where you can run a function in another thread in a very straightforward way:
 
-```Python
-from threading import Thread
-def function_name(*args,**kwargs):
-    pass
-
-thread = Thread(target=function_name, args=[, kwargs])
-thread.start()
-thread.join()
-```
-
-## installation
+## 1- Installation
 
 npm
 
@@ -27,81 +16,159 @@ yarn
  yarn add parallelizer-function
 ```
 
-In order to use **parallelizer-function** package in JavaScript you can use like this:
+## 2- Usage
 
-```JavaScript
+There are two main core parts of the library, the function **workerPromise**, which allow executing a function in a separate thread, and the **pool** object, which implements a Thread Pool that runs every task with a set predefined max number of threads or workers. It implements an async queue to execute the function once an available worker has finished its current work.
+The **Pool** class allows you to run your functions in a separate thread, so that it does not block the main thread. It also allows you to limit the number of concurrent threads, so that your application does not overload the system.
+
+```TypeScript
 const { workerPromise } = require("parallelizer-function");
 
-function function_name(...args){
-    // some computation ..
-    return value
+const longRunningTask = (n) => {
+  let result = 0;
+  for (let i = 0; i < n; i++) {
+    result += i;
+  }
+  return result;
 }
 
-/// It return a promise of the returned value of the function passed
-workerPromise(function_name,[arg0,arg1])
-    .then((res)=>{console.log(res)})
-    .catch((error)=>{console.error(error)})
+async function main() {
+    // workerPromise(fn: (...params: any[]) => any, args: any[] = []): Promise<any>
+    workerPromise(longRunningTask,[1_000_000])
+        .then((res)=>{console.log(res)})
+        .catch((error)=>{console.error(error)})
 
-/// or using try-catch
-try{
-    let res = await workerPromise(function_name,[arg0,arg1]);
+    /// or using try-catch
+    try{
+        let res = await workerPromise(longRunningTask,[1_000_000]);
+        console.log(res);
+    }catch(error){
+        console.error(error)
+    }
+}
+
+
+```
+
+### 2.1- Using the thread pool
+
+The **pool** also allows you to limit the number of concurrent threads, so that your application does not overload the system. This is useful for running long-running tasks, such as image processing, and running a large number of tasks concurrently.
+
+```typescript
+const { Pool, pool } = require('parallelizer-function');
+
+// It you want to maintain the global state of the pool use the object pool, but you can define a new Object: const newPool =  new Pool(2)
+
+pool.setMaxWorkers(2); // Set the maximum number of worker threads for the global object pool
+
+const longRunningTask = (n) => {
+  let result = 0;
+  for (let i = 0; i < n; i++) {
+    result += i;
+  }
+  return result;
+};
+
+const heavyImageProcessing = (imageData: ImageData) => {
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    // This is a heavy operation that will block the main thread
+    imageData.data[i] = imageData.data[i] * 2;
+    imageData.data[i + 1] = imageData.data[i + 1] * 2;
+    imageData.data[i + 2] = imageData.data[i + 2] * 2;
+  }
+  return imageData;
+};
+
+async function main() {
+  //pool.exec(fn: (...params: any[]) => any, args: any[]): Promise<any>
+  try {
+    let res = await pool.exec(longRunningTask, [1_000_000]);
     console.log(res);
-}catch(error){
-    console.error(error)
+  } catch (error) {
+    console.error(error);
+  }
+
+  /// You can use Promise.all to run several tasks
+
+  try {
+    Promise.all([
+      pool.exec(longRunningTask, [1_000_000]),
+      pool.exec(longRunningTask, [2_000_000]),
+      pool.exec(heavyImageProcessing, [imageData]),
+    ]).then((res) => {
+      console.log(res);
+    });
+    console.log(
+      'This function will be executed very fast, the above heavy tasks will not block the main thread'
+    );
+  } catch (error) {
+    console.error(error);
+  }
 }
 ```
 
+### 2.2- Model implemented
 
-#### Stackblitz examples
+Here you can appreciate an ilustration of the thread pool implemented.
+
+<img src="./images/worker-pool.png" height="250" />
+
+## 3- Testing
+
+**We have run several unit tests that cover error handling, expected behavior, rejections, memory leaks, concurrency states, and more. Here I share with you a snapshot of coverage with jest:**
+
+<img src="./images/coverange.jpeg" height=250/>
+
+## 4- Stackblitz examples
 
 #### [stackblitz example in a react application](https://stackblitz.com/edit/parallelizer-function-example-react?file=src/App.tsx)
 
 #### [stackblitz example in a node application](https://stackblitz.com/edit/parallelizer-function-example-node?file=index.js)
 
+## 5- Limitations
 
+1. The worker function must be able to be stringified or cloned (e.g. cannot be a class method)
+2. All the libraries or packages the function uses in performing its task should be imported inside the function. This is becouse workers run in another global context that is different from the current window. The function will be isolated as if it were in a separate script.
+3. You can run whatever code you like inside the worker thread, with some exceptions. For example, you can't directly manipulate the DOM from inside a worker, or use some default methods and properties of the window object
 
-The primary importance of **workerPromise** is that it executes the passed function in a separate thread, which makes the execution of that function not block the main JavaScript thread during the execution of the event loop. It should be noted that extensive thread usage will cause a memory impact on the program process. It is a trade-off between performance and responsiveness.
-We should rely on the built-in JavaScript functionalities to execute I/O operations like querying a database, read-write files, or making an http request. These tasks will not block the main JS event loop execution; behind the scenes, the v8 engine uses the C libuv library to execute these I/O tasks.
-
-But if we have to perform some extensive computation that includes a lot of iteration, like performing a kind of data processing or data normalization, process images, math computation, physic simulation, web crawling, etc. We can use the workerPromise function to allow that.
-And the important thing is that all the libraries or packages the function uses in performing its task should be imported inside the function. That is because the Worker class works in JavaScirpt; The function will be isolated as if it were in a separate script. This fn can access every file of the script in which was invoked and can access the same process.env of the main thread.
+Here an example where we want to process a text file and return its content as a list
+of rows
 
 ```TypeScript
-import workerPromise from "parallelizer-function";
+import { pool } from "parallelizer-function";
 import path from "path";
 
 //////////// main script
 try{
-    let res:Array<string> = await workerPromise(async (pathFile)=>{
-        const fs = require('fs');
-        let files = fs.readFileSync(pathFile, { encoding: 'utf-8' });
-        return files.split('\n');
-    },[path.resolve("../docs/sample-name.txt")]);
+    let pathToFile = path.resolve("../docs/sample-name.txt");
+
+    let res:Array<string> = await pool.exec(
+        async (pathFile)=>{
+            const fs = require('fs');
+            let files = fs.readFileSync(pathFile, { encoding: 'utf-8' });
+            return files.split('\n');
+        }, [pathToFile]);
+
     console.log("Names: ", res)
 }catch(error){
     console.error(error)
 }
-/// this is like if where in a separate thread on another js script like this
-const fs = require('fs');
-self.onmessage = async ({data})=>{
-    try{
-        let files = fs.readFileSync(pathFile, { encoding: 'utf-8' });
-        let res = files.split('\n');
-        self.postMessage({ error: null, data: res });
-    }catch(error){
-        self.postMessage({ error: error, data: null });
-    }
-}
 ```
 
-Is important to clarify that the the script is created in memory with the use of URL.createObjectURL function and Blob class of JavaScript.
+## 6- Examples
 
-## Example uses case
+Here are some examples of how you might use this package in your application:
+
+1. Running a long-running task, such as image processing, in a separate thread to prevent it from blocking the main thread.
+2. Running a large number of tasks concurrently, but limiting the number of threads to prevent the system from becoming overloaded.
+3. Running a task in a separate thread and using a callback function to retrieve the result
 
 Let's imagine we have this sample of functions we want to compute on a website or respond to a request using an express server.
 
 ```TypeScript
-import workerPromise from "parallelizer-function";
+import { Pool } from "parallelizer-function";
+
+let pool = new Pool(4); // Here we instanciate another instance of Worker Pool and we set a pool of 4 workers
 
 function isPrimeThisNumber(n){
     // This function takes an integer and returns whether it is a prime number or not. Complexity O(n^1/2)
@@ -111,7 +178,7 @@ function isPrimeThisNumber(n){
     return true
 }
 
-function 3Sum(arr=[]){
+function TripleSum(arr=[]){
     // This function return all the distinc triplet i,j,k i<j<k,
     // where arr[i] + arr[j] + arr[k] sum up to 0. Complexity O(n^2)
     let visited = new Set()
@@ -135,11 +202,11 @@ function 3Sum(arr=[]){
     return sol
 }
 
-function simulateLongTask(){
-    // This function simulate a task that will take 10 seconds to finish
+function simulateLongTask(delayS = 10){
+    // This function simulate a task that will take <delayS> seconds to finish
     let now = Date.now();
     let iter = 0;
-    let MAX_DELAY = 10*1000; // 10 seconds 100000 milliseconds
+    let MAX_DELAY = delayS * 1000; // 10 seconds 100000 milliseconds
     while((Date.now() - now) < MAX_DELAY ){
         iter++;
     }
@@ -167,12 +234,12 @@ someBTNEl.addEventListener("click",()=>{
 })
 ```
 
-using **workerPromise** we can avoid the bloking of the EventLopp for the above functions.
+using **pool** we can avoid the bloking of the EventLopp for the above functions.
 
 ```TypeScript
 someBTNEl.addEventListener("click",async ()=>{
     try{
-        let res = await workerPromise(isPrimeThisNumber,[352684978]);
+        let res = await pool.exec(isPrimeThisNumber,[352684978]);
         console.log(res);
     // This will not block the main thread of JS, it will run "isPrimeThisNumber"
     // in a separate thread using Worker class.
@@ -184,36 +251,98 @@ someBTNEl.addEventListener("click",async ()=>{
 })
 // You can do all computation in once
 someBTNEl.addEventListener("click",async ()=>{
-    const[isPrime,sum] = await Promise.all([
-        workerPromise(isPrimeThisNumber,[352684978]),
-        workerPromise(simulateLongTask)
-    ])
-    /// This will not block the main thread of JS, it will run
+    Promise.all([
+        pool.exec(isPrimeThisNumber,[352684978]),
+        pool.exec(simulateLongTask,[10])
+    ]).then((isPrime,sum] )=>{
+        /// do more stuff
+    })
 })
 
 // Or in and endpoind for the computation of the functions
 let functions = {
-    3Sum,
+    TripleSum,
     isPrimeThisNumber,
     simulateLongTask
 }
+
 app.post("/compute/:fn",(req,res)=>{
     let fn = req.params.fn;
     if(!fn || !(fn in functions)){
         return res.status(401).json({msg:"Not found the function"});
     }
     try{
-        let res = await workerPromise(functions[fn],req.body.args);
+        let res = await pool.exec(functions[fn],req.body?.args || []);
         // This will not block the main thread of JS, it will run
-        return res.status(200).json({error:false,msg:"OK",data:res});
+        return res.status(200).json({ error:false,msg:"OK",data:res });
     }catch(e){
-        return res.status(400).json({error:true,msg:e.message});
+        return res.status(400).json({ error:true,msg:e.message });
     }
 })
 ```
 
-##### Stackblitz examples
+### 6.1 - Example of image processing
 
-#### [stackblitz example in a react application](https://stackblitz.com/edit/parallelizer-function-example-react?file=src/App.tsx)
+```TypeScript
 
-#### [stackblitz example in a node application](https://stackblitz.com/edit/parallelizer-function-example-node?file=index.js)
+import { pool } from "parallelizer-function";
+
+const heavyImageProcessing = (imageData: ImageData) => {
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    // This is a heavy operation that will block the main thread
+    imageData.data[i] = imageData.data[i] * 2;
+    imageData.data[i + 1] = imageData.data[i + 1] * 2;
+    imageData.data[i + 2] = imageData.data[i + 2] * 2;
+  }
+  return imageData;
+};
+
+const processImage = async (image: HTMLImageElement) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(image, 0, 0);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+  // This will block the main thread
+  const processedImageData = heavyImageProcessing(imageData);
+  ctx.putImageData(processedImageData, 0, 0);
+
+  return canvas.toDataURL();
+};
+
+const processImageInWorker = async (image: HTMLImageElement) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(image, 0, 0);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+  // This will not block the main thread
+  const processedImageData = await pool.exec(heavyImageProcessing, [imageData]);
+  ctx.putImageData(processedImageData, 0, 0);
+
+  return canvas.toDataURL();
+};
+```
+
+In the above example, processImage will block the main thread, causing the user interface to freeze and the application to become unresponsive. On the other hand, processImageInWorker uses the Pool class to execute the heavy image processing task in a separate worker thread, allowing the main thread to continue executing and providing a better user experience.
+
+## 7 - Conclucion
+
+The thread pool allows you to run your functions in separate threads, so they do not block the main thread. It also allows you to limit the number of concurrent threads, so that your application does not overload the system. This is useful for running long-running tasks, such as image processing, and running a large number of tasks concurrently.
+
+## 8 - Note
+
+This package has been tested on Node.js v14.x v16.x, v18.x and in browser like Mozilla and Chrome using Vanilla JavaScript, React and Angular
+
+## Author
+
+author: [Jose Alejandro Concepcion Alvarez](https://www.npmjs.com/~jalejandro2928)
+github: [Github](https://github.com/josealejandro2928)
+
+## License
+
+This project is licensed under the MIT License.

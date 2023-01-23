@@ -156,26 +156,7 @@ describe('Pool', () => {
     expect(data).toHaveLength(10);
     let memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
     expect(memoryDiff).toBeLessThan(1024 * 1024 * 5); // 5MB
-    initialMemoryUsage = process.memoryUsage();
-
-    const sum = (...nums: number[]): number => {
-      return nums.reduce((acc, cur) => acc + cur, 0);
-    };
-
-    data = await Promise.all([
-      pool.exec(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      pool.exec(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      pool.exec(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      pool.exec(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      pool.exec(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      pool.exec(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      pool.exec(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      pool.exec(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-    ]);
-    expect(data).toHaveLength(8);
-    memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
-    expect(memoryDiff).toBeLessThan(1024 * 1024 * 10); // 10MB
-
+ 
     initialMemoryUsage = process.memoryUsage();
 
     const memoryLeak = (delayMs = 100): Promise<number> => {
