@@ -10,7 +10,7 @@ const workerPromise = async (
             Promise.resolve((${fn.toString()})(...data)).then((value) => {
               self.postMessage({ error: null, data: value });
             }).catch((error) => {
-              self.postMessage({ error: error, data: null });
+              self.postMessage({ error: new Error("Error in worker execution: " + error.message), data: null });
             })   
           }`;
         let urlToCode: any = URL.createObjectURL(new Blob([code]));
@@ -29,7 +29,7 @@ const workerPromise = async (
           reject(ev.data);
           worker.terminate();
         };
-        worker.onerror = (ev: ErrorEvent) => {
+        worker.onerror = (ev: ErrorEvent) => { 
           reject(ev);
           worker.terminate();
         };
@@ -44,7 +44,12 @@ const workerPromise = async (
         const worker = new Worker(
           `
             const { workerData, parentPort } = require('worker_threads')
-            Promise.resolve((${fn.toString()})(...workerData)).then((returnedData) => parentPort.postMessage(returnedData));
+            Promise.resolve((${fn.toString()})(...workerData))
+            .then((value) => {
+              parentPort.postMessage({ error: null, data: value });
+            }).catch((error) => {
+              parentPort.postMessage({ error: new Error("Error in worker execution: " + error.message), data: null });
+            })
           `,
           {
             eval: true,
@@ -52,10 +57,16 @@ const workerPromise = async (
           }
         );
         worker.once('message', (value: any) => {
-          resolve(value);
+          const { error, data } = value;
+          if (error) {
+            reject(error);
+          } else {
+            resolve(data);
+          }
           worker.terminate();
         });
         worker.once('error', (error: any) => {
+          error.message = 'Error in worker execution: ' + error.message;
           reject(error);
           worker.terminate();
         });

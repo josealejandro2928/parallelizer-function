@@ -122,11 +122,10 @@ describe('Test making I/O operations', () => {
       await workerPromise(async () => {
         const axios = require('axios');
         let data = await axios.get('http://noexiste.xxx/');
-        console.log('🚀 ~ file: index-node.spec.ts:125 ~ awaitworkerPromise ~ data', data);
         return data;
       }, []);
-    } catch (e: any) {
-      expect(true).toBe(true);
+    } catch (error: any) {
+      expect(error.message).toContain('Error in worker');
     }
   });
   it('It should perform read files and handle errors', async () => {
@@ -148,8 +147,9 @@ describe('Test making I/O operations', () => {
         let files = fs.readFileSync(pathFile, { encoding: 'utf-8' });
         return files.split('\n');
       }, []);
-    } catch (e: any) {
-      expect(e.message).toContain('no such file or directory');
+    } catch (error: any) {
+      expect(error.message).toContain('no such file or directory');
+      expect(error.message).toContain('Error in worker');
     }
   });
 });
