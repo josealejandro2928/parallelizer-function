@@ -1,5 +1,5 @@
 const workerPromise = async (
-  fn: (...params: [any]) => any = () => {},
+  fn: (...params: any[]) => any = () => {},
   args: any[] = []
 ): Promise<any> => {
   if (!(typeof window === 'undefined')) {

@@ -60,15 +60,31 @@ async function main() {
 
     try {
         let t1 = performance.now();
-        pool.setMaxWorkers(4);
+        pool.setMaxWorkers(2);
         const [encoderData, decoderData] = await pool.exec(tokenize, [text]);
         console.log("The state1: ", pool.getState());
         Promise.all(
-            [pool.exec(sumUpTo, [200000]),
-            pool.exec(sumUpTo, [5000]),
-            pool.exec(fibonacci, [30]),
-            pool.exec(encode, ["The CPU cycles are creation", encoderData]),
+            [pool.exec(sumUpTo, [200000]).then((res) => {
+                console.log("State when sumUpTo- 20000 finish: ", pool.getState())
+                return res;
+            }),
+            pool.exec(sumUpTo, [5000]).then((res) => {
+                console.log("State when sumUpTo- 5000 finish: ", pool.getState())
+                return res;
+            }),
+            pool.exec(fibonacci, [30]).then((res) => {
+                console.log("State when fibonacci- 30 finish: ", pool.getState())
+                return res;
+            }),
+            pool.exec(encode, ["The CPU cycles are creation", encoderData]).then((res) => {
+                console.log("State when encode finish: ", pool.getState())
+                return res;
+            }),
             pool.exec(decode, [[0, 1, 2, 3, 36, 39, 40, 3, 22, 26, 22, 14, 2, 4, 3, 9, 11, 2, 3, 22, 11, 2, 9, 10, 5, 7, 15], decoderData])
+                .then((res) => {
+                    console.log("State when decode finish: ", pool.getState())
+                    return res;
+                })
             ]).then((result) => {
                 let t2 = performance.now();
                 console.log("Time elapsed: ", t2 - t1);
@@ -95,7 +111,7 @@ async function main() {
                 return res;
             })
         ]).then((result) => {
-            console.log("The result",result);
+            console.log("The result", result);
         })
     } catch (error) {
         console.log("🚀 ~ file: index.js:30 ~ main ~ error", error.message)

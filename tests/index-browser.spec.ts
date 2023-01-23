@@ -56,7 +56,7 @@ describe('NPM Package', () => {
   });
 });
 
-describe('Test workerPromise function for NodeJS environment', () => {
+describe('Test workerPromise function for Browser environment', () => {
   it('should be a function', () => {
     expect(workerPromise).toBeInstanceOf(Function);
   });
