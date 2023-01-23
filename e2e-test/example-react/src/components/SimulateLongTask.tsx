@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import workerPromise from 'parallelizer-function';
+import workerPromise, { pool } from 'parallelizer-function';
 import 'highlight.js/styles/atom-one-dark-reasonable.css';
 import hljs from 'highlight.js';
 
 const SimulateLongTask = ({
-  setSimulateLongTask = (x: number) => {},
-  setDelayS = (x: number) => {},
+  setSimulateLongTask = (x: number) => { },
+  setDelayS = (x: number) => { },
 }: {
   setSimulateLongTask: (x: number) => any;
   setDelayS: (x: number) => any;
@@ -36,7 +36,7 @@ const SimulateLongTask = ({
   async function onSimulateLongTask() {
     setLoading(true);
     if (inASeparatedThread) {
-      let res: number = await workerPromise(simulateLongTask, [inputVal]);
+      let res: number = await pool.exec(simulateLongTask, [inputVal]);
       setSimulateLongTask(res);
     } else {
       let res = simulateLongTask(inputVal);

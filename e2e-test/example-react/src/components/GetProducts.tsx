@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import workerPromise from 'parallelizer-function';
+import { pool } from 'parallelizer-function';
 import 'highlight.js/styles/atom-one-dark-reasonable.css';
 import hljs from 'highlight.js';
 
@@ -78,7 +78,7 @@ const GetProducts = ({ setData = () => {} }: { setData: (x: any) => any }) => {
   async function getProducts() {
     setLoading(true);
     try {
-      let data: any = await workerPromise(getAllProduct);
+      let data: any = await pool.exec(getAllProduct);
       setData(data);
     } catch (e) {
       console.error(e);

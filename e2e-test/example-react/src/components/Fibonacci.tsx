@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import workerPromise from "parallelizer-function";
+import { pool } from 'parallelizer-function';
 import "highlight.js/styles/atom-one-dark-reasonable.css";
 import hljs from "highlight.js";
 
@@ -26,7 +26,7 @@ const FibonacciComputator = () => {
     }
 
     async function onUpdateNonBlockValue() {
-        let fib: number = await workerPromise(fibonacci, [nonBlockInput])
+        let fib: number = await pool.exec(fibonacci, [nonBlockInput])
         setNonBlockValue(fib);
     }
 

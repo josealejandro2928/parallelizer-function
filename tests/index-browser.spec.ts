@@ -56,7 +56,7 @@ describe('NPM Package', () => {
   });
 });
 
-describe('Test workerPromise function for NodeJS environment', () => {
+describe('Test workerPromise function for Browser environment', () => {
   it('should be a function', () => {
     expect(workerPromise).toBeInstanceOf(Function);
   });
@@ -107,8 +107,9 @@ describe('Test making I/O operations', () => {
         data = await data.json();
         return data;
       }, []);
-    } catch (e: any) {
-      expect(e.message).toContain('failed');
+    } catch (error: any) {
+      expect(error.message).toContain('Error in worker');
+      expect(error.message).toContain('failed');
     }
 
     try {
@@ -116,6 +117,7 @@ describe('Test making I/O operations', () => {
         throw new Error('Custom Error');
       });
     } catch (error: any) {
+      expect(error.message).toContain('Error in worker');
       expect(error.message).toContain('Custom Error');
     }
   });
