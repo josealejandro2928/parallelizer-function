@@ -60,31 +60,14 @@ async function main() {
 
     try {
         let t1 = performance.now();
-        pool.setMaxWorkers(2);
+        pool.setMaxWorkers(8);
         const [encoderData, decoderData] = await pool.exec(tokenize, [text]);
-        console.log("The state1: ", pool.getState());
         Promise.all(
-            [pool.exec(sumUpTo, [200000]).then((res) => {
-                console.log("State when sumUpTo- 20000 finish: ", pool.getState())
-                return res;
-            }),
-            pool.exec(sumUpTo, [5000]).then((res) => {
-                console.log("State when sumUpTo- 5000 finish: ", pool.getState())
-                return res;
-            }),
-            pool.exec(fibonacci, [30]).then((res) => {
-                console.log("State when fibonacci- 30 finish: ", pool.getState())
-                return res;
-            }),
-            pool.exec(encode, ["The CPU cycles are creation", encoderData]).then((res) => {
-                console.log("State when encode finish: ", pool.getState())
-                return res;
-            }),
+            [pool.exec(sumUpTo, [200000]),
+            pool.exec(sumUpTo, [5000]),
+            pool.exec(fibonacci, [30]),
+            pool.exec(encode, ["The CPU cycles are creation", encoderData]),
             pool.exec(decode, [[0, 1, 2, 3, 36, 39, 40, 3, 22, 26, 22, 14, 2, 4, 3, 9, 11, 2, 3, 22, 11, 2, 9, 10, 5, 7, 15], decoderData])
-                .then((res) => {
-                    console.log("State when decode finish: ", pool.getState())
-                    return res;
-                })
             ]).then((result) => {
                 let t2 = performance.now();
                 console.log("Time elapsed: ", t2 - t1);
@@ -97,22 +80,7 @@ async function main() {
         console.log("This code runs without blocking the EventLoop");
         console.log("Another computation secuentally: ", sumUpTo(1000000))
         console.log("Hello world");
-        console.log("The state2: ", pool.getState());
 
-        Promise.allSettled([
-            pool.exec(sumUpTo, [1_000_000]),
-            pool.exec(() => {
-                stela.key = 45;
-                return 45;
-            }),
-            pool.exec(async () => {
-                let res = await fetch("http://asdasdsd.xxx.com")
-                res = await res.json();
-                return res;
-            })
-        ]).then((result) => {
-            console.log("The result", result);
-        })
     } catch (error) {
         console.log("🚀 ~ file: index.js:30 ~ main ~ error", error.message)
     }
