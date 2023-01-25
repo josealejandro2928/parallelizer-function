@@ -8,6 +8,14 @@ class TestPool(unittest.TestCase):
     def setUp(self):
         self.pool = Pool(4)
 
+    def tearDownClass():
+        files_to_destory = ["file.txt", "file1.txt", "file2.txt"]
+        import os
+        for file in files_to_destory:
+            if os.path.isfile(file):
+                os.remove(file)
+        print("\nAll generated files by the test has been deleted")
+
     def test_exec(self):
         def task(n):
             return n*n
@@ -99,7 +107,6 @@ class TestPool(unittest.TestCase):
         self.pool.await_tasks((task, [1]), (task, [1]))
         end_time = time.time()
         self.assertTrue(end_time - start_time < 2)
-        self.pool.set_max_workers(4)
 
     def test_concurrency_2(self):
         def task(n):
@@ -112,7 +119,6 @@ class TestPool(unittest.TestCase):
         self.pool.await_tasks((task, [1]), (task, [1]))
         end_time = time.time()
         self.assertTrue(end_time - start_time > 2)
-        self.pool.set_max_workers(4)
 
     def test_concurrency_not_block_the_main_thread(self):
         def task(n):
@@ -150,13 +156,12 @@ class TestPool(unittest.TestCase):
             map(lambda x: x.id, self.pool.get_task_queue())))
         self.assertEqual(set([1, 2]), set(
             map(lambda x: x.id, self.pool.get_running_tasks())))
-        
+
         time.sleep(0.6)
         self.assertEqual(set([]), set(
             map(lambda x: x.id, self.pool.get_task_queue())))
-        self.assertEqual(set([3,4]), set(
+        self.assertEqual(set([3, 4]), set(
             map(lambda x: x.id, self.pool.get_running_tasks())))
-      
 
 
 if __name__ == '__main__':

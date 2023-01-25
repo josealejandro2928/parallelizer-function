@@ -107,3 +107,5 @@ dist
 .DS_Store
 lib
 *.tgz
+
+python/file*.txt
