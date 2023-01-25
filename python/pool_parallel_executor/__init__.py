@@ -1,7 +1,6 @@
 import threading
 from collections import deque
 
-
 class TaskRunneable:
     def __init__(self, fn, args: list, resolve_cb, id):
         self.fn = fn if fn else lambda x: x
@@ -10,10 +9,10 @@ class TaskRunneable:
         self.id = id
 
     def __str__(self) -> str:
-        return f"fn:{self.fn.__name__}, args:{self.args}"
+        return f"fn:{self.fn.__name__}, args:{self.args}, id: {self.id}"
 
 
-class Pool:
+class PoolThreadingExecutor:
     id_workers = 0
 
     def __init__(self, workers: int = 4):
@@ -45,7 +44,6 @@ class Pool:
     def __execute_task(self, task_runnable: TaskRunneable):
         try:
             result = task_runnable.fn(*task_runnable.args)
-
             self.__finish_task_of_running(task_runnable)
             task_runnable.resolve_cb(None, result, task_runnable)
         except Exception as e:
@@ -61,8 +59,8 @@ class Pool:
 
     def exec(self, task, args: list, on_resolve_cb, id=None):
         if id == None:
-            id = Pool.id_workers
-            Pool.id_workers += 1
+            id = PoolThreadingExecutor.id_workers
+            PoolThreadingExecutor.id_workers += 1
 
         task_running: TaskRunneable = TaskRunneable(
             task, args, on_resolve_cb, id)
@@ -71,28 +69,31 @@ class Pool:
         return self
 
     def await_tasks(self, *params: list):
+
         result_tasks_count = 0
         resultTasks = [None] * len(params)
+
         for fn, args in params:
             if not callable(fn) or not iter(args):
                 raise Exception(
                     "Error in the params of the function, should be a list of callback with arguments")
 
-        lock = threading.Lock()
-
         def on_resolve_callback(err, result, runnable_task: TaskRunneable):
             nonlocal resultTasks, result_tasks_count
-            lock.acquire()
-            result_tasks_count += 1
-            resultTasks[runnable_task.id] = {"error": err, "result": result}
-            lock.release()
+            self.lock_tasks.acquire()
+            try:
+                result_tasks_count += 1
+                resultTasks[runnable_task.id] = {
+                    "error": err, "result": result}
+            finally:
+                self.lock_tasks.release()
 
         index = 0
         for fn, args in params:
             self.exec(fn, args, on_resolve_callback, index)
             index += 1
 
-        while(result_tasks_count < len(params)):
+        while result_tasks_count < len(params):
             pass
 
         return resultTasks
@@ -110,3 +111,5 @@ class Pool:
 
     def get_running_tasks(self):
         return self.__running_tasks
+
+

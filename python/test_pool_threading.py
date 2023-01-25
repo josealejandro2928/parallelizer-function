@@ -1,12 +1,12 @@
 import unittest
 from collections import deque
-from pool import Pool
+from pool_parallel_executor import PoolThreadingExecutor
 import time
 
 
 class TestPool(unittest.TestCase):
     def setUp(self):
-        self.pool = Pool(4)
+        self.pool = PoolThreadingExecutor(4)
 
     def tearDownClass():
         files_to_destory = ["file.txt", "file1.txt", "file2.txt"]
@@ -80,12 +80,6 @@ class TestPool(unittest.TestCase):
         def task2():
             with open("file2.txt", "w") as f:
                 f.write("Hello World!")
-
-        def on_resolve_cb(err, result, runnable_task):
-            self.assertIsNone(err)
-            with open(f"file{runnable_task.id + 1}.txt", "r") as f:
-                content = f.read()
-                self.assertEqual(content, "Hello World!")
 
         response = self.pool.await_tasks((task1, []), (task2, []))
 
