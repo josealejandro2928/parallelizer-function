@@ -20,4 +20,4 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.pyhton-version }}
-      - run: python ./python/pool_parallel_executor/test_pool_threading.py
+      - run: python ./python/test_pool_threading.py
