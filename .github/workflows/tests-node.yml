@@ -13,7 +13,6 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x, 18.x]
-        python-version: ["3.7", "3.10"]
 
     steps:
       - uses: actions/checkout@v3
@@ -23,9 +22,3 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
       - run: npm run test
-      - uses: actions/checkout@v3
-      - name: Use Python.js ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.pyhton-version }}
-      - run: python ./python/pool_parallel_executor/test_pool_threading.py

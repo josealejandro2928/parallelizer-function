@@ -1,0 +1,23 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.10"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Python.js ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.pyhton-version }}
+      - run: python ./python/pool_parallel_executor/test_pool_threading.py
