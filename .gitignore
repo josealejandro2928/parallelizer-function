@@ -109,3 +109,4 @@ lib
 *.tgz
 
 python/file*.txt
+__pycache__/
