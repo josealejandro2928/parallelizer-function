@@ -1,5 +1,4 @@
-const { workerPromise, pool } = require("../../lib/cjs/index")
-
+const { pool } = require("parallelizer-function");
 
 function fibonacci(n = 2) {
     if (n == 0) return 0
