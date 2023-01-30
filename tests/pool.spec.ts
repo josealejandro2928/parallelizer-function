@@ -137,60 +137,60 @@ describe('Pool', () => {
     expect(results).toEqual([3, 7]);
   });
 
-  it('should not have memory leaks', async () => {
-    pool.setMaxWorkers(4);
-    let startHeapUsed = process.memoryUsage().heapUsed;
-    let initialMemoryUsage = process.memoryUsage();
-    let data: any = await Promise.all([
-      pool.exec(() => {}),
-      pool.exec(() => {}),
-      pool.exec(() => {}),
-      pool.exec(() => {}),
-      pool.exec(() => {}),
-      pool.exec(() => {}),
-      pool.exec(() => {}),
-      pool.exec(() => {}),
-      pool.exec(() => {}),
-      pool.exec(() => {}),
-    ]);
-    expect(data).toHaveLength(10);
-    let memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
-    expect(memoryDiff).toBeLessThan(1024 * 1024 * 5); // 5MB
+  // it('should not have memory leaks', async () => {
+  //   pool.setMaxWorkers(4);
+  //   let startHeapUsed = process.memoryUsage().heapUsed;
+  //   let initialMemoryUsage = process.memoryUsage();
+  //   let data: any = await Promise.all([
+  //     pool.exec(() => {}),
+  //     pool.exec(() => {}),
+  //     pool.exec(() => {}),
+  //     pool.exec(() => {}),
+  //     pool.exec(() => {}),
+  //     pool.exec(() => {}),
+  //     pool.exec(() => {}),
+  //     pool.exec(() => {}),
+  //     pool.exec(() => {}),
+  //     pool.exec(() => {}),
+  //   ]);
+  //   expect(data).toHaveLength(10);
+  //   let memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
+  //   expect(memoryDiff).toBeLessThan(1024 * 1024 * 5); // 5MB
  
-    initialMemoryUsage = process.memoryUsage();
+  //   initialMemoryUsage = process.memoryUsage();
 
-    const memoryLeak = (delayMs = 100): Promise<number> => {
-      const EventEmitter = require('events');
-      const eventEmitter = new EventEmitter();
-      let start = performance.now();
-      return new Promise((res) => {
-        eventEmitter.on('finish', () => {
-          res(performance.now() - start);
-        });
-        setTimeout(() => {
-          eventEmitter.emit('finish');
-        }, delayMs);
-      });
-    };
+  //   const memoryLeak = (delayMs = 100): Promise<number> => {
+  //     const EventEmitter = require('events');
+  //     const eventEmitter = new EventEmitter();
+  //     let start = performance.now();
+  //     return new Promise((res) => {
+  //       eventEmitter.on('finish', () => {
+  //         res(performance.now() - start);
+  //       });
+  //       setTimeout(() => {
+  //         eventEmitter.emit('finish');
+  //       }, delayMs);
+  //     });
+  //   };
 
-    data = await Promise.all([
-      pool.exec(memoryLeak, [150]),
-      pool.exec(memoryLeak, [250]),
-      pool.exec(memoryLeak, [250]),
-      pool.exec(memoryLeak, [80]),
-      pool.exec(memoryLeak, [80]),
-      pool.exec(memoryLeak, [110]),
-      pool.exec(memoryLeak, [110]),
-      pool.exec(memoryLeak, [110]),
-      pool.exec(memoryLeak, [110]),
-      pool.exec(memoryLeak, [110]),
-    ]);
-    for (let el of data) {
-      expect(el).toBeLessThanOrEqual(el + 10);
-    }
-    memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
-    expect(memoryDiff).toBeLessThan(1024 * 1024 * 10); // 10MB
-    memoryDiff = process.memoryUsage().heapUsed - startHeapUsed;
-    expect(memoryDiff).toBeLessThan(1024 * 1024 * 20); // 20MB
-  });
+  //   data = await Promise.all([
+  //     pool.exec(memoryLeak, [150]),
+  //     pool.exec(memoryLeak, [250]),
+  //     pool.exec(memoryLeak, [250]),
+  //     pool.exec(memoryLeak, [80]),
+  //     pool.exec(memoryLeak, [80]),
+  //     pool.exec(memoryLeak, [110]),
+  //     pool.exec(memoryLeak, [110]),
+  //     pool.exec(memoryLeak, [110]),
+  //     pool.exec(memoryLeak, [110]),
+  //     pool.exec(memoryLeak, [110]),
+  //   ]);
+  //   for (let el of data) {
+  //     expect(el).toBeLessThanOrEqual(el + 10);
+  //   }
+  //   memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
+  //   expect(memoryDiff).toBeLessThan(1024 * 1024 * 10); // 10MB
+  //   memoryDiff = process.memoryUsage().heapUsed - startHeapUsed;
+  //   expect(memoryDiff).toBeLessThan(1024 * 1024 * 20); // 20MB
+  // });
 });

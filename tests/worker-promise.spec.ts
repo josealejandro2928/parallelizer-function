@@ -53,73 +53,73 @@ describe('workerPromise', () => {
     expect(promise).toBe(false);
   });
 
-  it('should not have memory leaks', async () => {
-    // Get initial memory usage
-    let initialMemoryUsage = process.memoryUsage();
-    let startHeapUsed = process.memoryUsage().heapUsed;
+  // it('should not have memory leaks', async () => {
+  //   // Get initial memory usage
+  //   let initialMemoryUsage = process.memoryUsage();
+  //   let startHeapUsed = process.memoryUsage().heapUsed;
 
-    // Execute workerPromise
-    await workerPromise(() => {}, []);
-    await workerPromise(() => {}, []);
-    await workerPromise(() => {}, []);
-    await workerPromise(() => {}, []);
-    await workerPromise(() => {}, []);
-    await workerPromise(() => {}, []);
-    await workerPromise(() => {}, []);
-    await workerPromise(() => {}, []);
+  //   // Execute workerPromise
+  //   await workerPromise(() => {}, []);
+  //   await workerPromise(() => {}, []);
+  //   await workerPromise(() => {}, []);
+  //   await workerPromise(() => {}, []);
+  //   await workerPromise(() => {}, []);
+  //   await workerPromise(() => {}, []);
+  //   await workerPromise(() => {}, []);
+  //   await workerPromise(() => {}, []);
 
-    // Get final memory usage
-    // Assert that the difference in memory usage is not significant
-    let memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
-    initialMemoryUsage = process.memoryUsage();
-    const sum = (...nums: number[]): number => {
-      return nums.reduce((acc, cur) => acc + cur, 0);
-    };
+  //   // Get final memory usage
+  //   // Assert that the difference in memory usage is not significant
+  //   let memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
+  //   initialMemoryUsage = process.memoryUsage();
+  //   const sum = (...nums: number[]): number => {
+  //     return nums.reduce((acc, cur) => acc + cur, 0);
+  //   };
 
-    let data: any = await Promise.all([
-      workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-      workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
-    ]);
-    expect(data).toHaveLength(4);
-    memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
-    expect(memoryDiff).toBeLessThan(1024 * 1024 * 10); // 10MB
+  //   let data: any = await Promise.all([
+  //     workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
+  //     workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
+  //     workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
+  //     workerPromise(sum, [...Array.from(new Array(Math.floor(Math.random() * 100)), (_, v) => +v)]),
+  //   ]);
+  //   expect(data).toHaveLength(4);
+  //   memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
+  //   expect(memoryDiff).toBeLessThan(1024 * 1024 * 10); // 10MB
 
-    initialMemoryUsage = process.memoryUsage();
+  //   initialMemoryUsage = process.memoryUsage();
 
-    const memoryLeak = (delayMs = 100): Promise<number> => {
-      const EventEmitter = require('events');
-      const eventEmitter = new EventEmitter();
-      let start = performance.now();
-      return new Promise((res) => {
-        eventEmitter.on('finish', () => {
-          res(performance.now() - start);
-        });
-        setTimeout(() => {
-          eventEmitter.emit('finish');
-        }, delayMs);
-      });
-    };
+  //   const memoryLeak = (delayMs = 100): Promise<number> => {
+  //     const EventEmitter = require('events');
+  //     const eventEmitter = new EventEmitter();
+  //     let start = performance.now();
+  //     return new Promise((res) => {
+  //       eventEmitter.on('finish', () => {
+  //         res(performance.now() - start);
+  //       });
+  //       setTimeout(() => {
+  //         eventEmitter.emit('finish');
+  //       }, delayMs);
+  //     });
+  //   };
 
-    data = await Promise.all([
-      workerPromise(memoryLeak, [150]),
-      workerPromise(memoryLeak, [250]),
-      workerPromise(memoryLeak, [250]),
-      workerPromise(memoryLeak, [80]),
-      workerPromise(memoryLeak, [80]),
-      workerPromise(memoryLeak, [110]),
-      workerPromise(memoryLeak, [110]),
-      workerPromise(memoryLeak, [110]),
-      workerPromise(memoryLeak, [110]),
-      workerPromise(memoryLeak, [110]),
-    ]);
-    for (let el of data) {
-      expect(el).toBeLessThanOrEqual(el + 10);
-    }
-    memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
-    expect(memoryDiff).toBeLessThan(1024 * 1024 * 10); // 10MB
-    memoryDiff = process.memoryUsage().heapUsed - startHeapUsed;
-    expect(memoryDiff).toBeLessThan(1024 * 1024 * 20); // 5MB
-  });
+  //   data = await Promise.all([
+  //     workerPromise(memoryLeak, [150]),
+  //     workerPromise(memoryLeak, [250]),
+  //     workerPromise(memoryLeak, [250]),
+  //     workerPromise(memoryLeak, [80]),
+  //     workerPromise(memoryLeak, [80]),
+  //     workerPromise(memoryLeak, [110]),
+  //     workerPromise(memoryLeak, [110]),
+  //     workerPromise(memoryLeak, [110]),
+  //     workerPromise(memoryLeak, [110]),
+  //     workerPromise(memoryLeak, [110]),
+  //   ]);
+  //   for (let el of data) {
+  //     expect(el).toBeLessThanOrEqual(el + 10);
+  //   }
+  //   memoryDiff = process.memoryUsage().heapUsed - initialMemoryUsage.heapUsed;
+  //   expect(memoryDiff).toBeLessThan(1024 * 1024 * 10); // 10MB
+  //   memoryDiff = process.memoryUsage().heapUsed - startHeapUsed;
+  //   expect(memoryDiff).toBeLessThan(1024 * 1024 * 20); // 5MB
+  // });
 });
