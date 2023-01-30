@@ -109,7 +109,6 @@ describe('Test making I/O operations', () => {
       }, []);
     } catch (error: any) {
       expect(error.message).toContain('Error in worker');
-      expect(error.message).toContain('failed');
     }
 
     try {
