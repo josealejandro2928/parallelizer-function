@@ -8,9 +8,9 @@ An npm package for running JavaScript functions in a different Thread. This impl
     - [2.1- Using the thread pool](#21--using-the-thread-pool)
     - [2.2- Model implemented](#22--model-implemented)
   - [3- Testing](#3--testing)
-  - [4- Stackblitz examples](#4--stackblitz-examples)
-      - [stackblitz example in a react application](#stackblitz-example-in-a-react-application)
-      - [stackblitz example in a node application](#stackblitz-example-in-a-node-application)
+  - [4- Examples](#4--examples)
+    - [4.2 - GitHub examples node app, react app, vanilla app, vue app](#42---github-examples-node-app-react-app-vanilla-app-vue-app)
+    - [4.2 - Stackblitz](#42---stackblitz)
   - [5- Limitations](#5--limitations)
   - [6- Examples](#6--examples)
     - [6.1 - Example of image processing](#61---example-of-image-processing)
@@ -136,17 +136,30 @@ Here you can appreciate an ilustration of the thread pool implemented.
 
 <img src="./images/coverange.jpeg" height=250/>
 
-## 4- Stackblitz examples
+## 4- Examples
 
-#### [stackblitz example in a react application](https://stackblitz.com/edit/parallelizer-function-example-react?file=src/App.tsx)
+### 4.2 - GitHub examples node app, react app, vanilla app, vue app
 
-#### [stackblitz example in a node application](https://stackblitz.com/edit/parallelizer-function-example-node?file=index.js)
+1. [Example performing several long computation in NodeJS environment](https://github.com/josealejandro2928/parallelizer-function/tree/master/examples/node-example)
+2. [Example using in a React application](https://github.com/josealejandro2928/parallelizer-function/tree/master/examples/react-test)
+3. [Example using in another a React application](https://github.com/josealejandro2928/parallelizer-function/tree/master/examples/react-test-2)
+4. [Example in a Vanilla JS application](https://github.com/josealejandro2928/parallelizer-function/tree/master/examples/vanilla-js)
+5. [Example in a Vue 3 application with Composition](https://github.com/josealejandro2928/parallelizer-function/tree/master/examples/vue-test)
+
+**Using the package in an Angular application does not work for the moment because of the Webpack transformation over the functions. The package loses the correct toString() version of the part to execute in the worker thread.**
+
+### 4.2 - Stackblitz
+
+1. [stackblitz example in a react application](https://stackblitz.com/edit/parallelizer-function-example-react?file=src/App.tsx)
+
+2. [stackblitz example in a node application](https://stackblitz.com/edit/parallelizer-function-example-node?file=index.js)
 
 ## 5- Limitations
 
 1. The worker function must be able to be stringified or cloned (e.g. cannot be a class method)
-2. All the libraries or packages the function uses in performing its task should be imported inside the function. This is becouse workers run in another global context that is different from the current window. The function will be isolated as if it were in a separate script.
-3. You can run whatever code you like inside the worker thread, with some exceptions. For example, you can't directly manipulate the DOM from inside a worker, or use some default methods and properties of the window object
+2. The toString() method of the function should be the same of the function definition.
+3. All the libraries or packages the function uses in performing its task should be imported inside the function. This is becouse workers run in another global context that is different from the current window. The function will be isolated as if it were in a separate script.
+4. You can run whatever code you like inside the worker thread, with some exceptions. For example, you can't directly manipulate the DOM from inside a worker, or use some default methods and properties of the window object
 
 Here an example where we want to process a text file and return its content as a list
 of rows
