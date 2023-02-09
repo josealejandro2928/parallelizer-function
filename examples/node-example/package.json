@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "parallelizer-function": "file:../../parallelizer-function-0.0.5.tgz"
+    "parallelizer-function": "file:../../parallelizer-function-1.0.0.tgz"
   }
 }

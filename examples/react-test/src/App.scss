@@ -1,0 +1,57 @@
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.table th,
+.table td {
+  padding: 5px;
+  border: solid 1px #777;
+}
+.table th {
+  background-color: lightblue;
+}
+
+.product-container {
+  display: flex;
+  flex-direction: row;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.product-card {
+  width: 180px;
+  border-radius: 8px;
+  box-shadow: 1px 1px 8px rgb(0 0 0 / 20%);
+  .product-image {
+    height: 100px;
+    width: 100%;
+    background: #fafafa;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    img {
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+  .product-body {
+    padding: 8px;
+    .name {
+      margin: 2px 0px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .desc {
+      font-size: 12px;
+      opacity: 0.7;
+      margin: 0px;
+      line-height: 1.2;
+      line-break: anywhere;
+    }
+    .price {
+      text-align: end;
+      margin: 4px;
+      font-weight: 600;
+    }
+  }
+}

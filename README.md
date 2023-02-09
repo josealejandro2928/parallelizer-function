@@ -2,6 +2,23 @@
 
 An npm package for running JavaScript functions in a different Thread. This implementation uses the Worker API. It works for both browsers and NodeJs. Based on the run environment, it uses the Nodejs build-in library "worker_threads" or the default window.Worker class in case of a browser environment.
 
+- [parallelizer-function](#parallelizer-function)
+  - [1- Installation](#1--installation)
+  - [2- Usage](#2--usage)
+    - [2.1- Using the thread pool](#21--using-the-thread-pool)
+    - [2.2- Model implemented](#22--model-implemented)
+  - [3- Testing](#3--testing)
+  - [4- Stackblitz examples](#4--stackblitz-examples)
+      - [stackblitz example in a react application](#stackblitz-example-in-a-react-application)
+      - [stackblitz example in a node application](#stackblitz-example-in-a-node-application)
+  - [5- Limitations](#5--limitations)
+  - [6- Examples](#6--examples)
+    - [6.1 - Example of image processing](#61---example-of-image-processing)
+  - [7 - Conclucion](#7---conclucion)
+  - [8 - Note](#8---note)
+  - [Author](#author)
+  - [License](#license)
+
 ## 1- Installation
 
 npm

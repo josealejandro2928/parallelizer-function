@@ -1,9 +1,106 @@
-import workerPromiseFn from './worker-promise';
+export const workerPromise = async (
+  fn: (...params: any[]) => any = () => {},
+  args: any[] = []
+): Promise<any> => {
+  let isNodeEnvironment = (typeof window === 'undefined')
+  try {
+    const { Worker } = require('worker_threads');
+  } catch (e) {
+    isNodeEnvironment = false;
+  }
+  if (isNodeEnvironment) return workerPromiseNodeJs(fn, args);
+  return workerPromiseBrowser(fn, args);
 
-export const workerPromise = workerPromiseFn;
-export default workerPromise;
+  //////////////////FUCNTION FOR DIFFERENT ENVIRONMENTS ///////////////////////////
+  async function workerPromiseNodeJs(
+    fn: (...params: any[]) => any = () => {},
+    args: any[] = []
+  ): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const { Worker } = require('worker_threads');
+      try {
+        const worker = new Worker(
+          `
+            const { workerData, parentPort } = require('worker_threads')
+            Promise.resolve((${fn.toString()})(...workerData))
+            .then((value) => {
+              parentPort.postMessage({ error: null, data: value });
+            }).catch((error) => {
+              parentPort.postMessage({ error: new Error("Error in worker execution: " + error.message), data: null });
+            })
+          `,
+          {
+            eval: true,
+            workerData: args,
+          }
+        );
+        worker.once('message', (value: any) => {
+          const { error, data } = value;
+          if (error) {
+            reject(error);
+          } else {
+            resolve(data);
+          }
+          worker.terminate();
+        });
+        worker.once('error', (error: any) => {
+          error.message = 'Error in worker execution: ' + error.message;
+          reject(error);
+          worker.terminate();
+        });
+        worker.once('exit', (exitCode: any) => {
+          if (exitCode != 0) {
+            return reject('Process exit with error');
+          }
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 
-class EventEmitterV1 {
+  async function workerPromiseBrowser(
+    fn: (...params: any[]) => any = () => {},
+    args: any[] = []
+  ): Promise<any> {
+    return new Promise((resolve, reject) => {
+      try {
+        let code = `
+          self.onmessage = ({ data }) => {
+            Promise.resolve((${fn.toString()})(...data)).then((value) => {
+              self.postMessage({ error: null, data: value });
+            }).catch((error) => {
+              self.postMessage({ error: new Error("Error in worker execution: " + error.message), data: null });
+            })   
+          }`;
+        let urlToCode: any = URL.createObjectURL(new Blob([code]));
+        const worker = new window.Worker(urlToCode);
+        worker.postMessage(args);
+        worker.onmessage = (ev: MessageEvent<any>) => {
+          const { error, data } = ev.data;
+          if (error) {
+            reject(error);
+          } else {
+            resolve(data);
+          }
+          worker.terminate();
+        };
+        worker.onmessageerror = (ev: MessageEvent<any>) => {
+          reject(ev.data);
+          worker.terminate();
+        };
+        worker.onerror = (ev: ErrorEvent) => {
+          reject(ev);
+          worker.terminate();
+        };
+      } catch (error: any) {
+        reject(error);
+      }
+    });
+  }
+};
+
+export class EventEmitterV1 {
   subscritors: Map<string, Set<(...params: any[]) => any>> = new Map();
   emit(topic: string, data: any): void {
     if (!this.subscritors.has(topic)) {
@@ -25,7 +122,7 @@ class EventEmitterV1 {
   }
 }
 
-type ITaskRunning = {
+export type ITaskRunning = {
   task: (...params: any[]) => any;
   args: any[];
   resolveCb: (error: any, data: any, taskResolved?: (...params: any[]) => any) => void;
@@ -56,7 +153,7 @@ export class Pool {
       let nextTask = this.taskQueue.shift();
       if (!nextTask) return;
       this.runningTask.add(nextTask);
-      workerPromiseFn(nextTask.task, nextTask.args)
+      workerPromise(nextTask.task, nextTask.args)
         .then((response: any) => {
           this.finishTaskOfRunning(nextTask as ITaskRunning);
           nextTask?.resolveCb(null, response);
@@ -128,3 +225,5 @@ export class Pool {
 }
 
 export const pool = new Pool();
+
+export default workerPromise;

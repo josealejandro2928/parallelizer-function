@@ -1,4 +1,4 @@
-import { workerPromise } from "../../lib/esm/index.mjs";
+import { Pool, workerPromise } from "../../lib/esm/index.mjs";
 
 const blokingInputEl = document.querySelector("#bloking-input");
 const blokingBtnEl = document.querySelector("#bloking-btn");
@@ -9,6 +9,8 @@ const nonBlokingBtnEl = document.querySelector("#non-bloking-btn");
 const nonBlokingRes = document.querySelector("#non-bloking-res");
 const clickBtnEl = document.querySelector("#click-btn");
 const resClickEl = document.querySelector("#res-click");
+
+const pool = new Pool(4);
 
 function fibonacci(n = 2) {
     if (n <= 0) return 0
@@ -27,7 +29,7 @@ blokingBtnEl.addEventListener("click", async () => {
 
 nonBlokingBtnEl.addEventListener("click", async () => {
     try {
-        let res = await workerPromise(fibonacci, [+nonBlokingInputEl.value])
+        let res = await pool.exec(fibonacci, [+nonBlokingInputEl.value])
         nonBlokingRes.textContent = res
     } catch (e) {
         console.error(e.message);

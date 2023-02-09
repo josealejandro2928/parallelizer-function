@@ -20,6 +20,10 @@ function App() {
 
   useEffect(() => {
     console.log("Console.log:", pool.getState());
+    const promise: Promise<number> = pool?.exec(async () => {
+      return 100;
+    }, []) as any;
+    promise.then(console.log)
   }, [pool]);
 
   return (
