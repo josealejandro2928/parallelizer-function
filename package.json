@@ -27,7 +27,8 @@
     "test": "jest --detectOpenHandles",
     "coverage": "jest --detectOpenHandles --coverage",
     "semantic-release": "semantic-release",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "release":"npm run build && npm run test && npm publish"
   },
   "release": {
     "branches": [
